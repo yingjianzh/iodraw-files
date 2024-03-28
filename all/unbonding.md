@@ -1,7 +1,7 @@
 ```mermaid
 sequenceDiagram
     User->>Stride: 用户在stride上发起RedeemStake，需要解绑的stATOM被发送到stride上deposit地址
-    Stride->>Stride: 将tokenize产生的token IBC到stride对应的地址上
+    Stride->>Stride: 解绑请求发送给委托ICA
     User->>Stride: 在stride上进行Liquid Stake (LSM Liquid Stake)
     Stride->>User: stride mint stATOM 给用户（在stride上的地址）
     Stride->>Cosmos: stride把用户质押的代币抵押在主链上并增加用户奖励。
