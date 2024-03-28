@@ -4,5 +4,5 @@ sequenceDiagram
     Stride->>Cosmos: stride 使用ICA地址发起解除绑定
     Cosmos->>Cosmos: stake ATOM 变为 unstaked
     Cosmos->>Cosmos: 使用ICA，委托ICA解绑的ATOM转移到兑换ICA
-    Cosmos->>Cosmos: stride通过ICA账户进行对应的操作
+    Cosmos->>Cosmos: 
 ```
