@@ -1,6 +1,6 @@
 ```mermaid
 sequenceDiagram
-    User->>Stride: 用户在stride上发起RedeemStake，需要解绑的st
+    User->>Stride: 用户在stride上发起RedeemStake，需要解绑的stATOM fso
     User->>Stride: 将tokenize产生的token IBC到stride对应的地址上
     User->>Stride: 在stride上进行Liquid Stake (LSM Liquid Stake)
     Stride->>User: stride mint stATOM 给用户（在stride上的地址）
