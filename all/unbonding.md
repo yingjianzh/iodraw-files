@@ -1,7 +1,7 @@
 ```mermaid
 sequenceDiagram
     User->>Stride: 用户在stride上发起RedeemStake，需要解绑的stATOM被发送到stride上deposit地址
-    Stride->>Cosmos: stride 使用ICA
+    Stride->>Cosmos: stride 使用ICA地址发起解绑
     Cosmos->>Stride: ACK
     Cosmos->>Cosmos: 委托ICA账户会向解绑账户发送一个解绑指令。收到后告诉ICA账户将stake ATOM 变为 unstaked
     Cosmos->>Cosmos: stride把用户质押的代币抵押在主链上并增加用户奖励。
