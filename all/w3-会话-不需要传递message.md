@@ -17,7 +17,7 @@ flowchart TD
     J --> L[组装LLM Server接口组件生成的其它参数]    
     K --> M[组装LLM Server接口基础聊天的其它参数]    
     M --> N[调用LLM Server,获取响应]    
-    N --> O[生成message_id,转发流式响应给前端]
+    N --> O[message_id,转发流式响应给前端]
     O --> P[构建message,保存到t_messages表]
     P --> R([结束])
 
