@@ -28,8 +28,8 @@ flowchart TD
     U --> V[根据component_id,调用module generator打包接口]
     V --> W[轮询调用module generator提供打包状态查询功能接口获取打包结果]
     W --> X{是否打包成功}
-    X -- 是 --> Y[按照模板,组装响应结果,流式返回给前端]
-    X -- 否 --> Z[生成message_id,按照模板,组装失败的响应结果,流式返回给前端]
+    X -- 是 --> Y[按照模板,组装che响应结果,流式返回给前端]
+    X -- 否 --> Z[按照模板,组装失败的响应结果,流式返回给前端]
 
     Y & Z --> Result[1.构建message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
