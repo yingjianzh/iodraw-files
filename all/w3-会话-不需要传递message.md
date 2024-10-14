@@ -8,7 +8,7 @@ flowchart TD
     F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
     F -- 否 --> I
      
-    C & E & G --> I{是否是组件生成is_generated=true}
+    E & G --> I{是否是组件生成is_generated=true}
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
     I -- 否 --> K[设置LLM Server接口入参ai_role=0为基础聊天]
 
