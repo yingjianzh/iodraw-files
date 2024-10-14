@@ -3,16 +3,16 @@ flowchart TD
     A([开始]) --> B{根据conversation_id \n 判断是否是新会话}
     B -- 是 --> C[生成conversation_id,并插入t_conversations表]
     C --> D
-    B -- 否 --> D{是否包含引用}
+    B -- 否 --> D{是否包含引用,}
     D -- 是 --> E[设置LLM Server接口入参 \n 1.option=2 \n 2.message_id=赋值为对应的message_id]
     D -- 否 --> F{是否是重新生成回复}
     F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
     F -- 否 --> I
      
     E & G --> I{是否是组件生成is_generated=true}
+    I -- 否 --> K[设置LLM Server接口入参ai_role=0为基础聊天]
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
     
-
 
     J --> L[组装LLM Server接口组件生成的其它参数]    
     K --> M[组装LLM Server接口基础聊天的其它参数]    
