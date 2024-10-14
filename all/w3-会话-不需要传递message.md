@@ -10,7 +10,7 @@ flowchart TD
      
     C & E & G & H --> I{是否是组件生成is_generated=true}
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
-    I -- 否 --> K[标记为普通对话]
+    I -- 否 --> K[设置LLM Server接口入参ai_role=1为应用生成专家]
 
 
     J --> L[组装LLM Server接口组件生成参数]    
