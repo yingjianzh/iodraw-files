@@ -3,7 +3,7 @@ flowchart TD
     A([开始]) --> B{根据conversation_id \n 判断是否是新会话}
     B -- 是 --> C[生成conversation_id,并插入t_conversations表]
     B -- 否 --> D{是否包含引用}
-    D -- 是 --> E[根据conversation_id查询t_messages表获取该记录]
+    D -- 是 --> E[]
     D -- 否 --> F{是否是重新生成回复}
     F -- 是 --> G[查询t_messages表,获取当前问题之前的上下文]
     F -- 否 --> H[查找t_messages表,获取完整的上下文记录]
