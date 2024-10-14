@@ -9,7 +9,7 @@ flowchart TD
     F -- 否 --> H[查找t_messages表,获取完整的上下文记录]
      
     C & E & G & H --> I{是否是组件生成is_generated=true}
-    I -- 是 --> J[设置LLM Server接口入参ai_role=1,应用]
+    I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
     I -- 否 --> K[标记为普通对话]
 
 
