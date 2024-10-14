@@ -18,7 +18,7 @@ flowchart TD
     K --> M[组装LLM Server接口基础聊天的其它参数]    
     M --> N[调用LLM Server,获取响应]    
     N --> O[获取message_id,转发流式响应给前端]
-    O --> P[构建message保存到t_messages表 \n 用户需求+LLM 响应 2]
+    O --> P[构建message保存到t_messages表 \n 用户需求+LLM 响应 2条message]
     P --> R([结束])
 
 
@@ -31,6 +31,6 @@ flowchart TD
     X -- 是 --> Y[按照模板,组装成功响应结果,流式返回给前端]
     X -- 否 --> Z[按照模板,组装失败响应结果,流式返回给前端]
 
-    Y & Z --> Result[1.构建message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
+    Y & Z --> Result[1.构建message,将结果保存到t_messages '用户需求+LLM 响应 2条message'\n 2.构建component数据,将结果保存到t_components]
     Result --> R
 ```
