@@ -13,8 +13,8 @@ flowchart TD
     I -- 否 --> K[设置LLM Server接口入参ai_role=0为基础聊天]
 
 
-    J --> L[组装LLM Server接口组件生成参数]    
-    K --> M[组装LLM Server接口聊天参数]    
+    J --> L[组装LLM Server接口组件生成其参数]    
+    K --> M[组装LLM Server接口基础聊天的其它参数]    
     M --> N[调用LLM Server,获取响应]    
     N --> O[生成message_id,转发流式响应给前端]
     O --> P[构建message,保存到t_messages表]
