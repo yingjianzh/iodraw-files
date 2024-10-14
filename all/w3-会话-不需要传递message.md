@@ -6,7 +6,7 @@ flowchart TD
     D -- 是 --> E[设置LLM Server接口入参option=2]
     D -- 否 --> F{是否是重新生成回复}
     F -- 是 --> G[设置LLM Server接口入参option=1]
-    F -- 否 --> H[查找t_messages表,获取完整的上下文记录]
+    F -- 否 --> 
      
     C & E & G & H --> I{是否是组件生成is_generated=true}
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
