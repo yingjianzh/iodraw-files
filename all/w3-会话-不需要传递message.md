@@ -8,7 +8,7 @@ flowchart TD
     F -- 否 --> I
      
     E & G --> I{是否是组件生成 \n chat_role=1}
-    I -- 否 --> K[设置LLM Server接口入参ai_role=0为基础聊天]
+    I -- 否 --> K[设置LLM Server接口入参ai_role=1为基础聊天]
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
     
 
