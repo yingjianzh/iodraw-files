@@ -7,7 +7,7 @@ flowchart TD
     F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
     F -- 否 --> I
      
-    E & G --> I{是否是组件生成 \nchat_role=1}
+    E & G --> I{是否是组件生成 \n chat_role=1}
     I -- 否 --> K[设置LLM Server接口入参ai_role=0为基础聊天]
     I -- 是 --> J[设置LLM Server接口入参ai_role=1为应用生成专家]
     
@@ -16,7 +16,7 @@ flowchart TD
     K --> M[组装LLM Server接口基础聊天的其它参数]    
     M --> N[调用LLM Server,获取响应]    
     N --> O[获取message_id,转发流式响应给前端]
-    O --> P[构建message保存到t_messages表 \n 用户需求+LLM 响应 2条message]
+    O --> P[构建响应message保存到t_messages表 \n 用户需求+LLM 响应 2条message]
     P --> R([结束])
 
 
