@@ -1,6 +1,6 @@
 ```mermaid
 flowchart TD
-    A([开始]) --> D{是否包含引用,option=2}
+    A([开始]) --> D{是否包含引用 option=2}
     D -- 是 --> E[设置LLM Server接口入参 \n 1.option=2 \n 2.message_id=赋值为对应的message_id]
     D -- 否 --> F{是否是重新生成回复,option=1}
     F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
