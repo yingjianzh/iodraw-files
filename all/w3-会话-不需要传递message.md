@@ -32,6 +32,6 @@ flowchart TD
     Done --> OutPut[1.流式输出给前端 \n 2.构建对应的响应内容]
     OutPut --> Done
     
-    Result[1.构建响应message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
+    OutPut --> Result[1.构建响应message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
 ```
