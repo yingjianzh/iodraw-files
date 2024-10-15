@@ -30,7 +30,7 @@ flowchart TD
     X -- 否 --> Z[按照模板,组装失败响应结果]
     Y & Z --> Done{监听是否中断响应}
     Done -- 是 --> Result
-    Done -- 否 --> OutPut[1.流式输出给前端 \n 2.获取对应的响应内容]
+    Done -- 否 --> OutPut[1.流式输出给前端 \n 2.构建对应的响应内容]
 
     OutPut --> Result[1.构建响应message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
