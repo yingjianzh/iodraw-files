@@ -1,6 +1,6 @@
 ```mermaid
 flowchart TD
-    A([开始]) --> B{根据conversation_id \n 判断是否是新会话}
+    A([开始]) --> B{cong  \n 判断是否是新会话}
     B -- 是 --> C[生成conversation_id,并插入t_conversations表]
     C --> D
     B -- 否 --> D{是否包含引用,option=2}
@@ -31,6 +31,6 @@ flowchart TD
     X -- 是 --> Y[按照模板,组装成功响应结果,流式返回给前端]
     X -- 否 --> Z[按照模板,组装失败响应结果,流式返回给前端]
 
-    Y & Z --> Result[1.构建message,将结果保存到t_messages '用户需求+LLM 响应 2条message'\n 2.构建component数据,将结果保存到t_components]
+    Y & Z --> Result[1.构建message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
 ```
