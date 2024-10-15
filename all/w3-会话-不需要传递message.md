@@ -2,7 +2,7 @@
 flowchart TD
     A([开始]) --> B[1.从cookie中获取用户id,当前的会话id \n 2.获取用户需求 \n 3.构建message,保存到t_messsages表]
     B--> D{是否包含引用 \n action_option=2}
-    D -- 是 --> E[1.设置LLM Server接口入参option=2 \n 2.ref_msg_id=引用的消息]
+    D -- 是 --> E[1.设置LLM Server接口入参option=2 \n 2.ref_msg_id=引用的消息id \n ]
     D -- 否 --> F{是否是重新生成回复,option=1}
     F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
     F -- 否 --> I
