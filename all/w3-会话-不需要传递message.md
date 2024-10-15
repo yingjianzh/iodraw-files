@@ -28,7 +28,7 @@ flowchart TD
     W --> X{是否打包成功}
     X -- 是 --> Y[按照模板,组装成功响应结果]
     X -- 否 --> Z[按照模板,组装失败响应结果]
-    Y & Z --> Done{}
+    Y & Z --> Done{监听是否中断}
 
     Y & Z --> Result[1.构建响应message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
