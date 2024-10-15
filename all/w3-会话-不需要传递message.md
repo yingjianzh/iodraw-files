@@ -1,6 +1,6 @@
 ```mermaid
 flowchart TD
-    A([开始]) --> B{从 \n 判断是否是新会话}
+    A([开始]) --> B{从cookiehzong  \n 判断是否是新会话}
     B -- 是 --> C[生成conversation_id,并插入t_conversations表]
     C --> D
     B -- 否 --> D{是否包含引用,option=2}
