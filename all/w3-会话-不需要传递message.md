@@ -29,6 +29,6 @@ flowchart TD
     X -- 是 --> Y[按照模板,组装成功响应结果,流式返回给前端]
     X -- 否 --> Z[按照模板,组装失败响应结果,流式返回给前端]
 
-    Y & Z --> Result[1.构建message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
+    Y & Z --> Result[1.构建响应message,将结果保存到t_messages \n 2.构建component数据,将结果保存到t_components]
     Result --> R
 ```
