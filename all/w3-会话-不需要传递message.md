@@ -4,7 +4,7 @@ flowchart TD
     B--> D{是否包含引用 \n option=2}
     D -- 是 --> E[1.设置LLM Server接口入参option=2 \n 2.ref_msg_id=引用的消息id \n 3.req_msg_id=请求消息id]
     D -- 否 --> F{是否是重新生成回复\n option=1}
-    F -- 是 --> G[设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
+    F -- 是 --> G[1.设置LLM Server接口入参 \n 1.option=1 \n 2.message_id=赋值为对应的message_id]
     F -- 否 --> I
      
     E & G --> I{是否是组件生成 \n chat_role=1}
