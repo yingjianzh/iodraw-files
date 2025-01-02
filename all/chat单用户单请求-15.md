@@ -28,7 +28,7 @@ flowchart TD
     
     subgraph Redis锁管理
         CheckLock --> GetLock[GET ]
-        SetLock --> SetRedis[SET chat_lock:{userId} NX PX 30000]
-        ReleaseLock --> DelLock[DEL chat_lock:{userId}]
+        SetLock --> SetRedis[SET ]
+        ReleaseLock --> DelLock[DEL ]
     end
 ```
