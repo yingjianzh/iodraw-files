@@ -1,34 +1,23 @@
 ```mermaid
 flowchart TD
-    Start([用户发起请求]) --> Auth{认证校验}
-    Auth -- 失败 --> AuthError[返回认证错误]
-    Auth -- 成功 --> CheckLock{检查请求锁}
+    A[用户发起聊天请求] --> B{检查是否存在进行中的请求}
+    B -->|存在进行中请求| C[拒绝新请求]
+    B -->|不存在进行中请求| D[尝试获取分布式锁]
     
-    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
-    CheckLock -- 未锁定 --> SetLock[设置Redis请求锁]
+    D --> E{是否成功获取锁}
+    E -->|获取锁成功| F[创建聊天会话]
+    E -->|获取锁失败| C
     
-    SetLock --> ValidateInput{基础参数校验}
-    ValidateInput -- 失败 --> InputError[返回参数错误]
-    ValidateInput -- 成功 --> CallLLM[调用LLM接口]
+    F --> G[初始化SSE流式连接]
+    G --> H[调用大模型接口]
+    H --> I[开始流式响应]
     
-    CallLLM --> LLMResponse{LLM响应检查}
-    LLMResponse -- 超时/错误 --> HandleError[错误处理]
-    LLMResponse -- 成功 --> PrepareRes[准备返回数据]
+    I --> J{响应是否完成}
+    J -->|未完成| K[持续推送数据块]
+    K --> J
     
-    HandleError --> ReleaseLock[释放Redis锁]
-    PrepareRes --> ReleaseLock
+    J -->|响应完成| L[释放分布式锁]
+    L --> M[关闭SSE连接]
     
-    ReleaseLock --> Response[返回响应给用户]
-    Response --> End([结束])
-
-    subgraph 错误处理过程
-        HandleError --> LogError[记录错误日志]
-        LogError --> PrepareError[准备错误响应]
-    end
-    
-    subgraph Redis锁管理
-        CheckLock --> GetLock[GET ]
-        SetLock --> SetRedis[SET ]
-        ReleaseLock --> DelLock[DEL chat_lock:{userId}]
-    end
+    C --> N[返回并发限制错误]
 ```
