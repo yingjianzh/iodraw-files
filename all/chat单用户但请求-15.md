@@ -1,38 +1,62 @@
 ```mermaid
 flowchart TD
-    Start([用户发起请求]) --> RateLimit{通过频率限制?}
-    RateLimit -- 否 --> RateError[返回频率限制错误]
-    RateLimit -- 是 --> CheckLock{检查用户锁状态}
+    Start([用户发起请求]) --> Auth{认证验证}
+    Auth -- 失败 --> AuthError[返回认证错误]
+    Auth -- 成功 --> LoadUser[加载用户信息]
     
-    CheckLock -- 已锁定 --> LockError[返回已有进行中请求]
-    CheckLock -- 未锁定 --> AcquireLock[获取用户锁]
+    LoadUser --> CheckQuota{检查用户配额}
+    CheckQuota -- 超额 --> QuotaError[返回配额超限错误]
+    CheckQuota -- 正常 --> CheckReqLock{检查请求锁}
     
-    AcquireLock --> ValidateReq{请求验证}
-    ValidateReq -- 失败 --> ValidationError[返回验证错误]
-    ValidateReq -- 成功 --> ProcessLLM[调用LLM处理请求]
+    CheckReqLock -- 已锁定 --> ReqLockedError[返回重复请求错误]
+    CheckReqLock -- 未锁定 --> SetReqLock[设置请求锁]
     
-    ProcessLLM --> LLMSuccess{LLM调用成功?}
-    LLMSuccess -- 否 --> HandleError[错误处理]
-    LLMSuccess -- 是 --> PrepareResponse[准备响应数据]
+    SetReqLock --> ValidateInput{输入验证}
+    ValidateInput -- 失败 --> InputError[返回输入错误]
+    ValidateInput -- 成功 --> PreProcess[预处理请求]
     
-    HandleError --> ReleaseLock[释放用户锁]
-    PrepareResponse --> ReleaseLock
+    PreProcess --> LoadContext[加载对话上下文]
+    LoadContext --> TokenCheck{Token计算和截断}
+    TokenCheck --> Queue{任务队列检查}
     
-    ReleaseLock --> SendResponse[返回响应]
-    SendResponse --> End([结束])
+    Queue -- 队列已满 --> QueueError[返回系统繁忙]
+    Queue -- 可处理 --> ProcessLLM[LLM处理]
     
-    subgraph 错误处理流程
-        HandleError
+    ProcessLLM --> Timeout{超时检查}
+    Timeout -- 超时 --> TimeoutError[返回超时错误]
+    Timeout -- 正常 --> SaveContext[保存上下文]
+    
+    SaveContext --> UpdateQuota[更新用户配额]
+    UpdateQuota --> ReleaseReqLock[释放请求锁]
+    ReleaseReqLock --> Response[返回响应]
+    Response --> End([结束])
+    
+    subgraph 前置校验
+        Auth
+        LoadUser
+        CheckQuota
     end
     
-    subgraph Redis锁管理
-        CheckLock
-        AcquireLock
-        ReleaseLock
+    subgraph 锁管理
+        CheckReqLock
+        SetReqLock
+        ReleaseReqLock
     end
     
-    subgraph LLM处理
+    subgraph 核心处理
+        PreProcess
+        LoadContext
+        TokenCheck
         ProcessLLM
-        LLMSuccess
+        SaveContext
+    end
+    
+    subgraph 异常处理
+        AuthError
+        QuotaError
+        ReqLockedError
+        InputError
+        QueueError
+        TimeoutError
     end
 ```
