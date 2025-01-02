@@ -2,33 +2,32 @@
 flowchart TD
     Start([用户发起请求]) --> Auth{认证校验}
     Auth -- 失败 --> AuthError[返回认证错误]
-    Auth -- 成功 --> CheckLock{检查请求锁}
+    Auth -- 成功 --> CheckLock{检查会话锁}
     
-    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
-    CheckLock -- 未锁定 --> SetLock[设置Redis请求锁]
+    CheckLock -- 已锁定 --> LockError[返回重复请求错误]
+    CheckLock -- 未锁定 --> InitStream[初始化流式连接]
     
-    SetLock --> ValidateInput{基础参数校验}
-    ValidateInput -- 失败 --> InputError[返回参数错误]
-    ValidateInput -- 成功 --> CallLLM[调用LLM接口]
+    InitStream --> SetLock[设置会话锁<br/>Key: chat_session:{userId}<br/>Value: connectionId]
+    SetLock --> WatchDog[启动心跳检测]
     
-    CallLLM --> LLMResponse{LLM响应检查}
-    LLMResponse -- 超时/错误 --> HandleError[错误处理]
-    LLMResponse -- 成功 --> PrepareRes[准备返回数据]
+    WatchDog --> CallLLM[调用LLM流式接口]
+    CallLLM --> StreamProcess{处理流式输出}
     
-    HandleError --> ReleaseLock[释放Redis锁]
-    PrepareRes --> ReleaseLock
+    StreamProcess -- 输出chunk --> UpdateHeartbeat[更新心跳时间戳]
+    UpdateHeartbeat --> StreamProcess
     
-    ReleaseLock --> Response[返回响应给用户]
-    Response --> End([结束])
-
-    subgraph 错误处理过程
-        HandleError --> LogError[记录错误日志]
-        LogError --> PrepareError[准备错误响应]
+    StreamProcess -- 结束/错误 --> CleanupConnection[清理连接]
+    CleanupConnection --> ReleaseLock[释放会话锁]
+    ReleaseLock --> End([结束])
+    
+    subgraph 心跳检测
+        WatchDog --> CheckHeartbeat{检查心跳}
+        CheckHeartbeat -- 超时 --> ForceCleanup[强制清理]
+        CheckHeartbeat -- 正常 --> WatchDog
     end
     
-    subgraph Redis锁管理
-        CheckLock --> GetLock[GET ]
-        SetLock --> SetRedis[SET ]
-        ReleaseLock --> DelLock[DEL ]
+    subgraph 异常处理
+        ConnectionLost[连接断开] --> ForceCleanup
+        ForceCleanup --> ReleaseLock
     end
 ```
