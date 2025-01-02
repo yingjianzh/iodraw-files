@@ -1,38 +1,34 @@
 ```mermaid
 flowchart TD
-    Start([用户发起请求]) --> RateLimit{通过频率限制?}
-    RateLimit -- 否 --> RateError[返回频率限制错误]
-    RateLimit -- 是 --> CheckLock{检查用户锁状态}
+    Start([用户发起请求]) --> Auth{认证校验}
+    Auth -- 失败 --> AuthError[返回认证错误]
+    Auth -- 成功 --> CheckLock{检查请求锁}
     
-    CheckLock -- 已锁定 --> LockError[返回已有进行中请求]
-    CheckLock -- 未锁定 --> AcquireLock[获取用户锁]
+    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
+    CheckLock -- 未锁定 --> SetLock[设置Redis请求锁]
     
-    AcquireLock --> ValidateReq{请求验证}
-    ValidateReq -- 失败 --> ValidationError[返回验证错误]
-    ValidateReq -- 成功 --> ProcessLLM[调用LLM处理请求]
+    SetLock --> ValidateInput{基础参数校验}
+    ValidateInput -- 失败 --> InputError[返回参数错误]
+    ValidateInput -- 成功 --> CallLLM[调用LLM接口]
     
-    ProcessLLM --> LLMSuccess{LLM调用成功?}
-    LLMSuccess -- 否 --> HandleError[错误处理]
-    LLMSuccess -- 是 --> PrepareResponse[准备响应数据]
+    CallLLM --> LLMResponse{LLM响应检查}
+    LLMResponse -- 超时/错误 --> HandleError[错误处理]
+    LLMResponse -- 成功 --> PrepareRes[准备返回数据]
     
-    HandleError --> ReleaseLock[释放用户锁]
-    PrepareResponse --> ReleaseLock
+    HandleError --> ReleaseLock[释放Redis锁]
+    PrepareRes --> ReleaseLock
     
-    ReleaseLock --> SendResponse[返回响应]
-    SendResponse --> End([结束])
-    
-    subgraph 错误处理流程
-        HandleError
+    ReleaseLock --> Response[返回响应给用户]
+    Response --> End([结束])
+
+    subgraph 错误处理过程
+        HandleError --> LogError[记录错误日志]
+        LogError --> PrepareError[准备错误响应]
     end
     
     subgraph Redis锁管理
-        CheckLock
-        AcquireLock
-        ReleaseLock
-    end
-    
-    subgraph LLM处理
-        ProcessLLM
-        LLMSuccess
+        CheckLock --> GetLock[GET chat_lock:{userId}]
+        SetLock --> SetRedis[SET chat_lock:{userId} NX PX 30000]
+        ReleaseLock --> DelLock[DEL chat_lock:{userId}]
     end
 ```
