@@ -1,62 +1,34 @@
 ```mermaid
 flowchart TD
-    Start([用户发起请求]) --> Auth{认证验证}
+    Start([用户发起请求]) --> Auth{认证校验}
     Auth -- 失败 --> AuthError[返回认证错误]
-    Auth -- 成功 --> LoadUser[加载用户信息]
+    Auth -- 成功 --> CheckLock{检查请求锁}
     
-    LoadUser --> CheckQuota{检查用户配额}
-    CheckQuota -- 超额 --> QuotaError[返回配额超限错误]
-    CheckQuota -- 正常 --> CheckReqLock{检查请求锁}
+    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
+    CheckLock -- 未锁定 --> SetLock[设置Redis请求锁<br/>Key: chat_lock:{userId}<br/>TTL: 30s]
     
-    CheckReqLock -- 已锁定 --> ReqLockedError[返回重复请求错误]
-    CheckReqLock -- 未锁定 --> SetReqLock[设置请求锁]
+    SetLock --> ValidateInput{基础参数校验}
+    ValidateInput -- 失败 --> InputError[返回参数错误]
+    ValidateInput -- 成功 --> CallLLM[调用LLM接口]
     
-    SetReqLock --> ValidateInput{输入验证}
-    ValidateInput -- 失败 --> InputError[返回输入错误]
-    ValidateInput -- 成功 --> PreProcess[预处理请求]
+    CallLLM --> LLMResponse{LLM响应检查}
+    LLMResponse -- 超时/错误 --> HandleError[错误处理]
+    LLMResponse -- 成功 --> PrepareRes[准备返回数据]
     
-    PreProcess --> LoadContext[加载对话上下文]
-    LoadContext --> TokenCheck{Token计算和截断}
-    TokenCheck --> Queue{任务队列检查}
+    HandleError --> ReleaseLock[释放Redis锁]
+    PrepareRes --> ReleaseLock
     
-    Queue -- 队列已满 --> QueueError[返回系统繁忙]
-    Queue -- 可处理 --> ProcessLLM[LLM处理]
-    
-    ProcessLLM --> Timeout{超时检查}
-    Timeout -- 超时 --> TimeoutError[返回超时错误]
-    Timeout -- 正常 --> SaveContext[保存上下文]
-    
-    SaveContext --> UpdateQuota[更新用户配额]
-    UpdateQuota --> ReleaseReqLock[释放请求锁]
-    ReleaseReqLock --> Response[返回响应]
+    ReleaseLock --> Response[返回响应给用户]
     Response --> End([结束])
-    
-    subgraph 前置校验
-        Auth
-        LoadUser
-        CheckQuota
+
+    subgraph 错误处理过程
+        HandleError --> LogError[记录错误日志]
+        LogError --> PrepareError[准备错误响应]
     end
     
-    subgraph 锁管理
-        CheckReqLock
-        SetReqLock
-        ReleaseReqLock
-    end
-    
-    subgraph 核心处理
-        PreProcess
-        LoadContext
-        TokenCheck
-        ProcessLLM
-        SaveContext
-    end
-    
-    subgraph 异常处理
-        AuthError
-        QuotaError
-        ReqLockedError
-        InputError
-        QueueError
-        TimeoutError
+    subgraph Redis锁管理
+        CheckLock --> GetLock[GET chat_lock:{userId}]
+        SetLock --> SetRedis[SET chat_lock:{userId} NX PX 30000]
+        ReleaseLock --> DelLock[DEL chat_lock:{userId}]
     end
 ```
