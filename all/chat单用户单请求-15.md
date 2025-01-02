@@ -4,7 +4,7 @@ flowchart TD
     Auth -- 失败 --> AuthError[返回认证错误]
     Auth -- 成功 --> CheckLock{检查请求锁}
     
-    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
+    CheckLock -- 已锁定 --> LockError[返回重复请求错误]
     CheckLock -- 未锁定 --> SetLock[设置Redis请求锁]
     
     SetLock --> ValidateInput{基础参数校验}
