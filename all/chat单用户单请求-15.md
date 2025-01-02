@@ -7,7 +7,7 @@ flowchart TD
     CheckLock -- 已锁定 --> LockError[返回重复请求错误]
     CheckLock -- 未锁定 --> InitStream[初始化流式连接]
     
-    InitStream --> SetLock[设置会话锁<br/>Key: chat_session:{userId}<br/>Value: connectionId]
+    InitStream --> SetLock[设置会话锁<br/>Key: chat_{userId}<br/>Value: connectionId]
     SetLock --> WatchDog[启动心跳检测]
     
     WatchDog --> CallLLM[调用LLM流式接口]
