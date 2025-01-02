@@ -4,7 +4,7 @@ flowchart TD
     Auth -- 失败 --> AuthError[返回认证错误]
     Auth -- 成功 --> CheckLock{检查请求锁}
     
-    CheckLock -- 已锁定 --> LockError[返回重复请求错误]
+    CheckLock -- 已锁定 --> LockError[返回重复请求错误:<br/>您有正在进行的对话]
     CheckLock -- 未锁定 --> SetLock[设置Redis请求锁]
     
     SetLock --> ValidateInput{基础参数校验}
@@ -27,7 +27,7 @@ flowchart TD
     end
     
     subgraph Redis锁管理
-        CheckLock --> GetLock[GET chat_lock:{userId}]
+        CheckLock --> GetLock[GET ]
         SetLock --> SetRedis[SET chat_lock:{userId} NX PX 30000]
         ReleaseLock --> DelLock[DEL chat_lock:{userId}]
     end
