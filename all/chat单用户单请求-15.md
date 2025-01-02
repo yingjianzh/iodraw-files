@@ -1,41 +1,55 @@
 ```mermaid
 flowchart TD
-    Start([开始]) --> A[接收用户请求]
-    A --> B{Redis 检查账户锁}
+    Start([请求开始]) --> A[获取用户ID]
+    A --> B{Redis SETNX 加锁}
     
-    B -->|已有锁| C[返回正在处理错误]
+    %% 加锁失败流程
+    B -->|失败| C[返回429错误]
     C --> End1([结束])
     
-    B -->|无锁| D[设置 Redis 锁<br>key: chat:lock:userId<br>value: requestId<br>expire: 30s]
-    D --> E[建立 SSE 连接]
+    %% 加锁成功流程
+    B -->|成功| D[设置锁过期时间30s]
+    D --> E[初始化SSE连接]
     
-    E --> F[创建错误监听 channel]
-    F --> G[创建完成监听 channel]
-    G --> H[启动 goroutine<br>调用大模型服务]
+    %% 主处理流程
+    E --> F[调用已有Chat接口]
     
-    H --> I{是否出错}
-    I -->|是| J[发送错误到错误 channel]
-    J --> K[清理 Redis 锁]
-    K --> L[关闭 SSE 连接]
-    L --> End2([结束])
+    %% 错误处理分支
+    F --> G{处理过程中的错误}
+    G -->|网络错误| H1[记录错误日志]
+    G -->|业务错误| H2[返回业务错误码]
+    G -->|系统错误| H3[触发告警]
+    H1 --> I[清理Redis锁]
+    H2 --> I
+    H3 --> I
+    I --> J[关闭SSE连接]
+    J --> End2([结束])
     
-    I -->|否| M[按 token 流式输出]
-    M --> N{是否完成}
-    N -->|否| M
-    N -->|是| O[发送完成到完成 channel]
-    O --> P[清理 Redis 锁]
-    P --> Q[关闭 SSE 连接]
-    Q --> End3([结束])
+    %% 正常处理分支
+    G -->|正常| K[输出响应]
+    K --> L[清理Redis锁]
+    L --> M[正常关闭SSE连接]
+    M --> End3([结束])
     
     %% 连接断开处理
-    E --> R[注册连接断开处理]
-    R --> S[清理 Redis 锁]
-    S --> T[关闭所有 channel]
-    T --> End4([结束])
+    E --> N[监听连接状态]
+    N --> O{连接是否断开}
+    O -->|是| P[执行清理]
+    P --> Q[清理Redis锁]
+    Q --> R[关闭资源]
+    R --> End4([结束])
     
-    style Start fill:#f9f,stroke:#333,stroke-width:2px
-    style End1,End2,End3,End4 fill:#f99,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style D fill:#bfb,stroke:#333,stroke-width:2px
-    style H fill:#fbf,stroke:#333,stroke-width:2px
+    %% 系统监控
+    F --> S[指标收集]
+    S --> T[Prometheus监控]
+    T --> U[告警触发]
+    
+    %% 样式
+    classDef error fill:#ffcccc,stroke:#ff0000,stroke-width:2px
+    classDef normal fill:#ccffcc,stroke:#333,stroke-width:2px
+    classDef monitor fill:#cce5ff,stroke:#333,stroke-width:2px
+    
+    class C,H1,H2,H3,J error
+    class D,K,L,M normal
+    class S,T,U monitor
 ```
