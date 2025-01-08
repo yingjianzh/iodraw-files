@@ -1,92 +1,14 @@
 ```mermaid
-graph TD
-    subgraph Clients["客户端层"]
-        HTTP["外部HTTP客户端\nRESTful API"]
-        GRPC["内部gRPC客户端\n.proto"]
-    end
+flowchart TD
+    A[前端发起API请求] -->|携带access_token| B{前端检查access_token是否过期}
+    B -->|未过期 exp > now| C[继续原始请求]
+    B -->|已过期 exp < now| D[使用refresh_token请求续期]
+    D -->|续期成功| E[后端返回access_token和新的过期时间]
+    D -->|续期失败| F{检查refresh_token状态}
+    F -->|refresh_token即将过期 < 1天| G[将refresh_token过期时间延长30天并返回新token]
+    F -->|refresh_token已过期| H[返回401, code=1002, msg=Token mismatch, Please log in again]
+    F -->|access_token已经续期过| I[Return code=1005, msg=access_token already refreshed]
+    E --> J[重试原始请求]
+    G --> J[重试原始请求]
 
-    subgraph Gateway["接入层"]
-        Nginx["Nginx\n反向代理/SSL终止"]
-        GW["gRPC-Gateway\n HTTP转gRPC"]
-    end
-
-    subgraph Auth["认证授权层"]
-        JWT["JWT验证"]
-        OAuth["OAuth2.0"]
-        KeyAuth["API Key认证"]
-    end
-
-    subgraph Service["服务层 Golang"]
-        GRPCS["gRPC Server\n:9000"]
-        subgraph Handler["处理器"]
-            Proto["Protocol Buffers\n数据序列化"]
-            Valid["参数校验\nValidator"]
-        end
-        subgraph BizLogic["业务逻辑层"]
-            Core["核心业务逻辑"]
-            KeyMgmt["密钥管理"]
-        end
-    end
-
-    subgraph Storage["存储层"]
-        MySQL[("MySQL\n主数据存储")]
-        Redis[("Redis\n缓存/限流")]
-    end
-
-    subgraph Observability["可观测性"]
-        Prom["Prometheus\n监控指标"]
-        Trace["Jaeger\n链路追踪"]
-        Log["ELK\n日志收集"]
-    end
-
-    subgraph Deploy["部署层"]
-        K8s["Kubernetes\n容器编排"]
-        Consul["Consul\n服务发现"]
-    end
-
-    %% 客户端连接
-    HTTP -->|HTTP/HTTPS| Nginx
-    GRPC -->|gRPC| Nginx
-    
-    %% 网关层流转
-    Nginx -->|HTTP| GW
-    Nginx -->|gRPC| GRPCS
-    GW -->|转换| GRPCS
-
-    %% 认证流程
-    GRPCS --> JWT
-    GRPCS --> OAuth
-    GRPCS --> KeyAuth
-    
-    %% 服务层处理
-    JWT --> Proto
-    OAuth --> Proto
-    KeyAuth --> Proto
-    Proto --> Valid
-    Valid --> Core
-    Valid --> KeyMgmt
-    
-    %% 存储交互
-    Core --> MySQL
-    Core --> Redis
-    KeyMgmt --> MySQL
-    
-    %% 可观测性
-    Service -->|指标| Prom
-    Service -->|链路| Trace
-    Service -->|日志| Log
-    
-    %% 部署管理
-    K8s -->|管理| Service
-    Consul -->|服务发现| Service
-
-    classDef gateway fill:#f9f,stroke:#333,stroke-width:2px
-    classDef storage fill:#ff9,stroke:#333,stroke-width:2px
-    classDef service fill:#9f9,stroke:#333,stroke-width:2px
-    classDef observability fill:#9ff,stroke:#333,stroke-width:2px
-    
-    class Nginx,GW gateway
-    class MySQL,Redis storage
-    class GRPCS,Handler,BizLogic service
-    class Prom,Trace,Log observability
 ```
