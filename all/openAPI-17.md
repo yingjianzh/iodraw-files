@@ -2,7 +2,7 @@
 flowchart TD
     A[前端发起API请求] -->|携带access_token| B{前端检查access_token是否过期}
     B -->|未过期 exp > now| C[继续原始请求]
-    B -->|已过期 exp < now| D[使用refresh_token请求续期]
+    B -->|已过期 exp < now| D[前端使用refresh_token请求续期]
     {检查refresh_token状态}
     D -->|refresh_token即将过期 < 1天| E[将refresh_token过期时间延长30天]
     D -->|refresh_token已过期| F[返回401, code=1002, msg=Token mismatch, Please log in again]
