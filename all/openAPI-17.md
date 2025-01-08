@@ -6,7 +6,7 @@ flowchart TD
     D ---> L{检查refresh_token状态}
     L -->|refresh_token即将过期 < 1天| E[将refresh_token过期时间延长30天]
     L -->|refresh_token已过期| F[返回401, code=1002, msg=Token mismatch, Please log in again]
-    L -->|refresh_token有效,且expire| G[使用refresh_token请求续期]
+    L -->|refresh_token有效,且expire_at > | G[使用refresh_token请求续期]
     G -->|续期成功| H[后端返回access_token和新的过期时间]
     G -->|续期失败| I[返回错误信息]
     H --> J[重试原始请求]
