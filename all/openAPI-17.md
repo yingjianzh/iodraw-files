@@ -1,7 +1,7 @@
 ```mermaid
 flowchart TD
     A[前端发起API请求] -->|携带access_token| B{前端检查access_token是否过期}
-    B -->|未过期 exp > now| C[继续原始请求]
+    B -->|未过期 exp > now，| C[继续原始请求]
     B -->|已过期 exp < now| D[前端使用refresh_token请求刷新接口进行续期]
     D ---> L{检查refresh_token状态}
     L -->|refresh_token有效且expire_at =< 7天| E[access_token进行续期, 同时将refresh_token过期时间延长30天]
